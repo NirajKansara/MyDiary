@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Cloud Diary</title>
+    <!-- Firebase Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <style>
+        body { font-family: sans-serif; background: #eef2f3; display: flex; justify-content: center; padding: 20px; }
+        .card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 100%; max-width: 500px; text-align: center; }
+        textarea { width: 100%; height: 300px; margin-top: 15px; border-radius: 8px; border: 1px solid #ddd; padding: 10px; box-sizing: border-box; font-size: 16px; }
+        input[type="date"] { padding: 10px; width: 100%; box-sizing: border-box; border-radius: 8px; border: 1px solid #ddd; margin-bottom: 10px; }
+        button { background: #4285f4; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin-bottom: 10px; }
+        #app { display: none; } /* Hidden until login */
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <div id="login-section">
+        <h2>My Secure Diary</h2>
+        <button onclick="login()">Login with Google</button>
+    </div>
+
+    <div id="app">
+        <h3 id="user-name">Welcome</h3>
+        <input type="date" id="datePicker">
+        <textarea id="editor" placeholder="Write something..."></textarea>
+        <p id="status" style="font-size: 12px; color: green;"></p>
+        <button onclick="logout()" style="background: #999;">Logout</button>
+    </div>
+</div>
+
+<script>
+    const firebaseConfig = {
+  apiKey: "AIzaSyCxWGAjeG5OTK1XkpwqtCCmLIz2UN8vAps",
+  authDomain: "nirajk-diary.firebaseapp.com",
+  projectId: "nirajk-diary",
+  storageBucket: "nirajk-diary.firebasestorage.app",
+  messagingSenderId: "716509879684",
+  appId: "1:716509879684:web:f49ffa26687e1b3ce291d1"
+};
+
+    // 2. Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    const datePicker = document.getElementById('datePicker');
+    const editor = document.getElementById('editor');
+    const status = document.getElementById('status');
+
+    // Set default date
+    datePicker.value = new Date().toISOString().split('T')[0];
+
+    // Login Function
+    function login() {
+        const provider = new firebase.auth.GoogleAuthProvider();
+        auth.signInWithPopup(provider);
+    }
+
+    function logout() { auth.signOut(); }
+
+    // Check if user is logged in
+    auth.onAuthStateChanged(user => {
+        if (user) {
+            document.getElementById('login-section').style.display = 'none';
+            document.getElementById('app').style.display = 'block';
+            document.getElementById('user-name').innerText = "Hello, " + user.displayName;
+            loadEntry();
+        } else {
+            document.getElementById('login-section').style.display = 'block';
+            document.getElementById('app').style.display = 'none';
+        }
+    });
+
+    // Load entry from Cloud
+    async function loadEntry() {
+        const user = auth.currentUser;
+        const date = datePicker.value;
+        const docId = `${user.uid}_${date}`; // Unique per user/date
+        
+        const doc = await db.collection("diaryEntries").doc(docId).get();
+        if (doc.exists) {
+            editor.value = doc.data().text;
+        } else {
+            editor.value = "";
+        }
+    }
+
+    // Save entry to Cloud
+    async function saveEntry() {
+        const user = auth.currentUser;
+        const date = datePicker.value;
+        const docId = `${user.uid}_${date}`;
+        
+        status.innerText = "Saving...";
+        await db.collection("diaryEntries").doc(docId).set({
+            uid: user.uid,
+            date: date,
+            text: editor.value,
+            lastSaved: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        status.innerText = "Saved to Cloud";
+    }
+
+    // Listeners
+    datePicker.onchange = loadEntry;
+    let timeout = null;
+    editor.oninput = () => {
+        clearTimeout(timeout);
+        timeout = setTimeout(saveEntry, 1000); // Save after 1 second of no typing
+    };
+</script>
+
+</body>
+</html>
