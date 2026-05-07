@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personal Cloud Diary Pro</title>
+
+    <!-- External Styles for "Pro" Look -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css" rel="stylesheet">
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    
+    <!-- Firebase Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+
+    <style>
+        :root {
+            --bg-dark: #121212;
+            --card-dark: #1e1e1e;
+            --accent: #bb86fc;
+            --text-main: #e0e0e0;
+        }
+
+        body, html { margin: 0; padding: 0; height: 100%; font-family: 'Inter', sans-serif; overflow-x: hidden; }
+
+        /* --- HOMEPAGE COVER --- */
+        #cover-page {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), 
+                        url('https://source.unsplash.com/featured/?nature,abstract,textures');
+            background-size: cover;
+            background-position: center;
+            color: white;
+            text-align: center;
+            transition: 0.5s;
+        }
+
+        #cover-page h1 { font-family: 'Playfair Display', serif; font-size: 4rem; margin-bottom: 10px; text-shadow: 2px 2px 10px rgba(0,0,0,0.5); }
+        .login-btn { 
+            background: white; color: black; padding: 15px 40px; border-radius: 50px; 
+            text-decoration: none; font-weight: 600; cursor: pointer; border: none; font-size: 1.1rem;
+            transition: transform 0.3s;
+        }
+        .login-btn:hover { transform: scale(1.05); background: var(--accent); color: white; }
+
+        /* --- MAIN DASHBOARD (DARK MODE) --- */
+        #main-app { display: none; background: var(--bg-dark); min-height: 100vh; color: var(--text-main); padding: 20px; }
+
+        .container { max-width: 1000px; margin: 0 auto; }
+        
+        /* Calendar Styling */
+        #calendar-container { background: var(--card-dark); padding: 20px; border-radius: 15px; margin-bottom: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .fc { color: white; }
+        .fc-daygrid-day:hover { background: #333 !important; cursor: pointer; }
+
+        /* Editor Modal */
+        #editor-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9); z-index: 1000; justify-content: center; align-items: center;
+        }
+        .editor-container { 
+            background: var(--card-dark); width: 90%; max-width: 800px; border-radius: 15px; 
+            padding: 20px; position: relative; max-height: 90vh; overflow-y: auto;
+        }
+        .close-btn { position: absolute; right: 20px; top: 20px; font-size: 24px; color: white; cursor: pointer; }
+
+        /* Toolbar Styling */
+        .ql-toolbar.ql-snow { background: #eee; border-radius: 8px 8px 0 0; }
+        #editor { height: 400px; background: white; color: black; border-radius: 0 0 8px 8px; }
+
+        .save-status { color: var(--accent); font-size: 0.8rem; margin-top: 10px; display: block; }
+    </style>
+</head>
+<body>
+
+    <!-- SECTION 1: THE COVER PAGE -->
+    <div id="cover-page">
+        <h1>Private Journal</h1>
+        <p>Your thoughts, secured in the clouds.</p><br>
+        <button class="login-btn" onclick="login()">Open Diary</button>
+    </div>
+
+    <!-- SECTION 2: THE CALENDAR DASHBOARD -->
+    <div id="main-app">
+        <div class="container">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2 id="welcome-text">My Calendar</h2>
+                <button onclick="logout()" style="background:none; border: 1px solid #666; color: #999; cursor: pointer; padding: 5px 10px; border-radius: 5px;">Logout</button>
+            </div>
+            <div id="calendar-container">
+                <div id="calendar"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SECTION 3: THE EDITOR OVERLAY -->
+    <div id="editor-overlay">
+        <div class="editor-container">
+            <span class="close-btn" onclick="closeEditor()">&times;</span>
+            <h2 id="selected-date-display" style="margin-top:0;">Date</h2>
+            <div id="toolbar-container"></div>
+            <div id="editor"></div>
+            <span id="save-status" class="save-status">All changes saved.</span>
+        </div>
+    </div>
+
+    <!-- SCRIPTS -->
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
+    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+
+    <script>
+        // Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+// Your web app's Firebase configuration
+const firebaseConfig = {
+  apiKey: "AIzaSyCxWGAjeG5OTK1XkpwqtCCmLIz2UN8vAps",
+  authDomain: "nirajk-diary.firebaseapp.com",
+  projectId: "nirajk-diary",
+  storageBucket: "nirajk-diary.firebasestorage.app",
+  messagingSenderId: "716509879684",
+  appId: "1:716509879684:web:f49ffa26687e1b3ce291d1"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        // Initialize Rich Text Editor
+        var quill = new Quill('#editor', {
+            modules: {
+                toolbar: [
+                    [{ 'header': [1, 2, false] }],
+                    ['bold', 'italic', 'underline'],
+                    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                    [{ 'align': [] }],
+                    ['clean']
+                ]
+            },
+            theme: 'snow'
+        });
+
+        let currentDocId = null;
+
+        // Login Logic
+        function login() {
+            const provider = new firebase.auth.GoogleAuthProvider();
+            auth.signInWithPopup(provider);
+        }
+
+        function logout() { auth.signOut(); location.reload(); }
+
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                document.getElementById('cover-page').style.display = 'none';
+                document.getElementById('main-app').style.display = 'block';
+                document.getElementById('welcome-text').innerText = "Welcome, " + user.displayName;
+                renderCalendar();
+            }
+        });
+
+        // Calendar Logic
+        function renderCalendar() {
+            var calendarEl = document.getElementById('calendar');
+            var calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                dateClick: function(info) {
+                    openEditor(info.dateStr);
+                }
+            });
+            calendar.render();
+        }
+
+        // Editor Functions
+        async function openEditor(date) {
+            document.getElementById('selected-date-display').innerText = new Date(date).toDateString();
+            document.getElementById('editor-overlay').style.display = 'flex';
+            
+            const user = auth.currentUser;
+            currentDocId = `${user.uid}_${date}`;
+            
+            // Load from Firestore
+            const doc = await db.collection("diaryEntries").doc(currentDocId).get();
+            if (doc.exists) {
+                quill.setContents(JSON.parse(doc.data().richText));
+            } else {
+                quill.setContents([]);
+            }
+        }
+
+        function closeEditor() {
+            document.getElementById('editor-overlay').style.display = 'none';
+        }
+
+        // Auto-Save Logic
+        quill.on('text-change', function() {
+            document.getElementById('save-status').innerText = "Saving...";
+            clearTimeout(window.saveTimer);
+            window.saveTimer = setTimeout(async () => {
+                if (!currentDocId) return;
+                const content = JSON.stringify(quill.getContents());
+                await db.collection("diaryEntries").doc(currentDocId).set({
+                    richText: content,
+                    lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+                }, { merge: true });
+                document.getElementById('save-status').innerText = "Cloud Synced";
+            }, 1000);
+        });
+
+    </script>
+</body>
+</html>
