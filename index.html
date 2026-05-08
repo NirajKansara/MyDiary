@@ -1,42 +1,103 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Cloud Diary</title>
-    <!-- Firebase Scripts -->
+    <title>My Professional Cloud Diary</title>
+    
+    <!-- Professional Tools (Libraries) -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    
+    <!-- Calendar Library -->
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
+    
+    <!-- Rich Text Editor Library (Bold/Italic/Bullets) -->
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+
     <style>
-        body { font-family: sans-serif; background: #eef2f3; display: flex; justify-content: center; padding: 20px; }
-        .card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 100%; max-width: 500px; text-align: center; }
-        textarea { width: 100%; height: 300px; margin-top: 15px; border-radius: 8px; border: 1px solid #ddd; padding: 10px; box-sizing: border-box; font-size: 16px; }
-        input[type="date"] { padding: 10px; width: 100%; box-sizing: border-box; border-radius: 8px; border: 1px solid #ddd; margin-bottom: 10px; }
-        button { background: #4285f4; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin-bottom: 10px; }
-        #app { display: none; } /* Hidden until login */
+        :root { --primary: #4a90e2; --bg-overlay: rgba(0,0,0,0.5); }
+        body, html { margin: 0; padding: 0; height: 100%; font-family: 'Segoe UI', sans-serif; }
+
+        /* Step 1: Attractive Login Page with Slideshow */
+        #login-page {
+            height: 100vh;
+            display: flex; justify-content: center; align-items: center;
+            background: url('https://images.unsplash.com/photo-1506784365847-bbad939e9335?auto=format&fit=crop&w=1600&q=80');
+            background-size: cover;
+            background-position: center;
+            transition: background-image 2s ease-in-out;
+            position: relative;
+        }
+        #login-page::before { content: ""; position: absolute; top:0; left:0; right:0; bottom:0; background: var(--bg-overlay); }
+        .login-box { position: relative; background: white; padding: 40px; border-radius: 20px; text-align: center; box-shadow: 0 15px 35px rgba(0,0,0,0.3); }
+        
+        /* Main App Layout */
+        #app-interface { display: none; padding: 20px; background: #f8f9fa; min-height: 100vh; }
+        .container { max-width: 900px; margin: auto; background: white; padding: 20px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+        
+        /* Diary Note Page (Hidden by default) */
+        #note-page { display: none; }
+        .toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        
+        /* Style for Highlights on Calendar */
+        .fc-event { font-size: 0.75em; background-color: #ffeb3b !important; border: none !important; color: black !important; padding: 2px; border-radius: 3px; }
+        
+        /* Text Editor Height */
+        #editor { height: 300px; margin-bottom: 20px; }
+        .highlight-input { width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 5px; font-weight: bold; }
+        
+        button { cursor: pointer; border: none; border-radius: 8px; padding: 10px 20px; background: var(--primary); color: white; font-weight: bold; }
+        .btn-back { background: #6c757d; }
     </style>
 </head>
 <body>
 
-<div class="card">
-    <div id="login-section">
-        <h2>My Secure Diary</h2>
-        <button onclick="login()">Login with Google</button>
+    <!-- LOGIN PAGE -->
+    <div id="login-page">
+        <div class="login-box">
+            <h1>My Private Diary</h1>
+            <p>Securely save your thoughts to the cloud.</p>
+            <button onclick="login()">Login with Google</button>
+        </div>
     </div>
 
-    <div id="app">
-        <h3 id="user-name">Welcome</h3>
-        <input type="date" id="datePicker">
-        <textarea id="editor" placeholder="Write something..."></textarea>
-        <p id="status" style="font-size: 12px; color: green;"></p>
-        <button onclick="logout()" style="background: #999;">Logout</button>
-    </div>
-</div>
+    <!-- APP INTERFACE -->
+    <div id="app-interface">
+        <div class="container">
+            
+            <!-- VIEW 1: CALENDAR -->
+            <div id="calendar-page">
+                <div class="toolbar">
+                    <h2 id="welcome-msg">Calendar</h2>
+                    <button onclick="logout()" style="background:#ff4444">Logout</button>
+                </div>
+                <div id="calendar"></div>
+            </div>
 
-<script>
-    // 
-const firebaseConfig = {
+            <!-- VIEW 2: DIARY ENTRY -->
+            <div id="note-page">
+                <div class="toolbar">
+                    <button class="btn-back" onclick="showCalendar()">← Back to Calendar</button>
+                    <h3 id="display-date">Date</h3>
+                    <button onclick="saveEntry()">Save Entry</button>
+                </div>
+                
+                <label>Daily Highlight (Shows on Calendar):</label>
+                <input type="text" id="highlight" class="highlight-input" placeholder="Example: Meeting with Sam, Trip to Paris...">
+                
+                <label>Your Diary Log:</label>
+                <div id="editor"></div>
+                <p id="status-msg"></p>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+       const firebaseConfig = {
   apiKey: "AIzaSyCxWGAjeG5OTK1XkpwqtCCmLIz2UN8vAps",
   authDomain: "nirajk-diary.firebaseapp.com",
   projectId: "nirajk-diary",
@@ -45,77 +106,117 @@ const firebaseConfig = {
   appId: "1:716509879684:web:f49ffa26687e1b3ce291d1"
 };
 
-    // 2. Initialize Firebase
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const db = firebase.firestore();
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
 
-    const datePicker = document.getElementById('datePicker');
-    const editor = document.getElementById('editor');
-    const status = document.getElementById('status');
+        // --- LOGIN SLIDESHOW LOGIC ---
+        const images = [
+            'https://images.unsplash.com/photo-1506784365847-bbad939e9335?auto=format&fit=crop&w=1600&q=80',
+            'https://images.unsplash.com/photo-1499750310107-5fef28a66643?auto=format&fit=crop&w=1600&q=80',
+            'https://images.unsplash.com/photo-1473186578172-c141e6798ee4?auto=format&fit=crop&w=1600&q=80'
+        ];
+        let imgIndex = 0;
+        setInterval(() => {
+            imgIndex = (imgIndex + 1) % images.length;
+            document.getElementById('login-page').style.backgroundImage = `url('${images[imgIndex]}')`;
+        }, 5000);
 
-    // Set default date
-    datePicker.value = new Date().toISOString().split('T')[0];
+        // --- APP LOGIC ---
+        let selectedDate = "";
+        let quill;
+        let calendar;
 
-    // Login Function
-    function login() {
-        const provider = new firebase.auth.GoogleAuthProvider();
-        auth.signInWithPopup(provider);
-    }
-
-    function logout() { auth.signOut(); }
-
-    // Check if user is logged in
-    auth.onAuthStateChanged(user => {
-        if (user) {
-            document.getElementById('login-section').style.display = 'none';
-            document.getElementById('app').style.display = 'block';
-            document.getElementById('user-name').innerText = "Hello, " + user.displayName;
-            loadEntry();
-        } else {
-            document.getElementById('login-section').style.display = 'block';
-            document.getElementById('app').style.display = 'none';
-        }
-    });
-
-    // Load entry from Cloud
-    async function loadEntry() {
-        const user = auth.currentUser;
-        const date = datePicker.value;
-        const docId = `${user.uid}_${date}`; // Unique per user/date
-        
-        const doc = await db.collection("diaryEntries").doc(docId).get();
-        if (doc.exists) {
-            editor.value = doc.data().text;
-        } else {
-            editor.value = "";
-        }
-    }
-
-    // Save entry to Cloud
-    async function saveEntry() {
-        const user = auth.currentUser;
-        const date = datePicker.value;
-        const docId = `${user.uid}_${date}`;
-        
-        status.innerText = "Saving...";
-        await db.collection("diaryEntries").doc(docId).set({
-            uid: user.uid,
-            date: date,
-            text: editor.value,
-            lastSaved: firebase.firestore.FieldValue.serverTimestamp()
+        // Initialize Rich Text Editor
+        quill = new Quill('#editor', {
+            theme: 'snow',
+            modules: { toolbar: [[{'header': [1, 2, false]}], ['bold', 'italic', 'underline'], [{'list': 'ordered'}, {'list': 'bullet'}]] }
         });
-        status.innerText = "Saved to Cloud";
-    }
 
-    // Listeners
-    datePicker.onchange = loadEntry;
-    let timeout = null;
-    editor.oninput = () => {
-        clearTimeout(timeout);
-        timeout = setTimeout(saveEntry, 1000); // Save after 1 second of no typing
-    };
-</script>
+        // Initialize Calendar
+        function initCalendar() {
+            const calendarEl = document.getElementById('calendar');
+            calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                headerToolbar: { left: 'prev,next today', center: 'title', right: '' },
+                dateClick: function(info) {
+                    openDiary(info.dateStr);
+                },
+                events: fetchHighlights // This pulls highlights from Firebase
+            });
+            calendar.render();
+        }
 
+        async function fetchHighlights(fetchInfo, successCallback) {
+            const user = auth.currentUser;
+            if(!user) return;
+            const snapshot = await db.collection("diaryEntries").where("uid", "==", user.uid).get();
+            const events = snapshot.docs.map(doc => ({
+                title: doc.data().highlight || "View Entry",
+                start: doc.data().date,
+                allDay: true
+            }));
+            successCallback(events);
+        }
+
+        function login() {
+            const provider = new firebase.auth.GoogleAuthProvider();
+            auth.signInWithPopup(provider);
+        }
+        function logout() { auth.signOut(); location.reload(); }
+
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                document.getElementById('login-page').style.display = 'none';
+                document.getElementById('app-interface').style.display = 'block';
+                document.getElementById('welcome-msg').innerText = "Hello, " + user.displayName;
+                initCalendar();
+            }
+        });
+
+        function openDiary(date) {
+            selectedDate = date;
+            document.getElementById('calendar-page').style.display = 'none';
+            document.getElementById('note-page').style.display = 'block';
+            document.getElementById('display-date').innerText = "Log for: " + date;
+            loadEntry(date);
+        }
+
+        function showCalendar() {
+            document.getElementById('calendar-page').style.display = 'block';
+            document.getElementById('note-page').style.display = 'none';
+            calendar.refetchEvents(); // Refresh highlights
+        }
+
+        async function loadEntry(date) {
+            const user = auth.currentUser;
+            const docId = `${user.uid}_${date}`;
+            const doc = await db.collection("diaryEntries").doc(docId).get();
+            if (doc.exists) {
+                quill.root.innerHTML = doc.data().text;
+                document.getElementById('highlight').value = doc.data().highlight || "";
+            } else {
+                quill.root.innerHTML = "";
+                document.getElementById('highlight').value = "";
+            }
+        }
+
+        async function saveEntry() {
+            const user = auth.currentUser;
+            const docId = `${user.uid}_${selectedDate}`;
+            const status = document.getElementById('status-msg');
+            status.innerText = "Saving to cloud...";
+            
+            await db.collection("diaryEntries").doc(docId).set({
+                uid: user.uid,
+                date: selectedDate,
+                text: quill.root.innerHTML,
+                highlight: document.getElementById('highlight').value,
+                lastSaved: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            status.innerText = "Saved Successfully!";
+            setTimeout(() => { status.innerText = ""; }, 2000);
+        }
+    </script>
 </body>
 </html>
