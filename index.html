@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Niraj's Indian Diary</title>
+    <title>My Private Diary</title>
     
     <!-- Libraries -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
@@ -15,103 +15,95 @@
 
     <style>
         :root { 
-            --bg: #0f0f0f; 
-            --card: #1a1a1a; 
-            --accent: #bc8cf2; 
-            --holiday: #ff9933; /* Saffron for Indian Holidays */
-            --text: #ffffff;
+            --bg: #121212; 
+            --card: #1e1e1e; 
+            --accent: #bb86fc; 
+            --holiday: #ff9933; 
+            --text: #e0e0e0;
         }
         
-        body { 
-            margin: 0; padding: 0; background: var(--bg); color: var(--text);
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            overflow-x: hidden;
+        body, html { margin: 0; padding: 0; height: 100%; background: var(--bg); color: var(--text); font-family: sans-serif; }
+
+        /* FIXED OVERLAP: The Login page takes full screen */
+        #login-page { 
+            height: 100vh; width: 100%;
+            display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;
+            background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), 
+                        url('https://images.unsplash.com/photo-1517842645767-c639042777db?auto=format&fit=crop&w=1200&q=80'); 
+            background-size: cover; background-position: center;
+            position: fixed; top: 0; left: 0; z-index: 100;
         }
-
-        /* Responsive Container */
-        .container { width: 100%; max-width: 600px; margin: auto; padding: 10px; box-sizing: border-box; }
-
-        /* Login Screen */
-        #login-page { height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('https://images.unsplash.com/photo-1532375810709-75b1da00537c?auto=format&fit=crop&w=800&q=80'); background-size: cover; }
         
-        /* Header Area */
-        .header { display: flex; justify-content: space-between; align-items: center; padding: 15px 5px; }
-        .header h2 { font-size: 1.4rem; color: var(--accent); margin: 0; }
+        /* App Container - Hidden by default */
+        #app-interface { display: none; padding: 15px; max-width: 600px; margin: auto; }
 
-        /* Calendar Styling */
-        #calendar { background: var(--card); border-radius: 15px; padding: 10px; border: 1px solid #333; height: auto; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .header h2 { color: var(--accent); margin: 0; }
+
+        /* Calendar */
+        #calendar { background: var(--card); border-radius: 12px; padding: 10px; border: 1px solid #333; }
         .fc .fc-toolbar-title { font-size: 1.1rem !important; color: var(--accent); }
-        .fc .fc-button { background: #333; border: none; text-transform: capitalize; }
-        .fc .fc-daygrid-day-number { color: #fff; font-size: 0.9rem; padding: 5px; }
+        .fc-daygrid-day-number { color: white !important; text-decoration: none; }
         
-        /* Event Styling */
-        .fc-event { border: none !important; padding: 2px 5px; font-size: 0.7rem !important; border-radius: 4px !important; }
-        .holiday-event { background-color: var(--holiday) !important; color: white !important; }
-        .diary-event { background-color: var(--accent) !important; color: black !important; font-weight: bold; }
+        /* Events */
+        .holiday-event { background-color: var(--holiday) !important; color: white !important; border: none !important; font-size: 0.7rem; }
+        .diary-event { background-color: var(--accent) !important; color: black !important; border: none !important; font-weight: bold; }
 
-        /* Vikram Samvat Label */
-        .vikram-label { font-size: 0.8rem; color: #aaa; margin-bottom: 10px; display: block; }
+        /* Note Page */
+        #note-page { display: none; }
+        input.highlight { width: 100%; padding: 12px; background: #252525; border: 1px solid #444; color: white; border-radius: 8px; margin-bottom: 10px; box-sizing: border-box; font-size: 16px; }
+        .ql-container { height: 250px; background: #252525; color: white; border-radius: 0 0 8px 8px; }
+        .ql-toolbar { background: #eee; border-radius: 8px 8px 0 0; }
 
-        /* Note Page Styling */
-        #note-page { display: none; animation: fadeIn 0.3s; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-        .toolbar { display: flex; justify-content: space-between; gap: 10px; margin-bottom: 15px; }
-        input.highlight { width: 100%; padding: 12px; background: #252525; border: 1px solid #444; color: white; border-radius: 8px; margin-bottom: 10px; box-sizing: border-box; }
-
-        /* Rich Text Editor for Mobile */
-        .ql-container { height: 250px; background: #252525; border-radius: 0 0 8px 8px; color: white; font-size: 16px; }
-        .ql-toolbar { background: #444; border-radius: 8px 8px 0 0; }
-
-        /* Mobile Buttons */
-        button { padding: 12px 18px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; font-size: 0.9rem; }
-        .btn-save { background: var(--accent); color: black; width: 100%; margin-top: 15px; }
+        button { padding: 12px 20px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; }
+        .btn-login { background: white; color: black; font-size: 1.1rem; padding: 15px 40px; }
+        .btn-save { background: var(--accent); color: black; width: 100%; margin-top: 10px; }
         .btn-voice { background: #4caf50; color: white; width: 100%; margin-top: 10px; }
         .btn-back { background: #333; color: white; }
-
-        /* Holiday Indicator */
-        .holiday-note { font-size: 0.8rem; color: var(--holiday); margin-bottom: 5px; font-style: italic; }
     </style>
 </head>
 <body>
 
-    <!-- Login -->
+    <!-- 1. LOGIN PAGE (Screen 1) -->
     <div id="login-page">
-        <h1 style="color:var(--accent); font-size: 2.5rem;">મારી ડાયરી</h1>
-        <p style="color: #ccc; padding: 0 20px;">તમારા વિચારોને સુરક્ષિત રાખો.</p>
-        <button style="background: white; color: black; font-size: 1.1rem; padding: 15px 30px;" onclick="login()">Login with Google</button>
+        <h1 style="color:white; font-size: 2.5rem; margin-bottom: 10px;">મારી ડાયરી</h1>
+        <p style="color: #ddd; margin-bottom: 30px;">તમારા વિચારોને સુરક્ષિત રાખો.</p>
+        <button class="btn-login" onclick="login()">Login with Google</button>
     </div>
 
-    <!-- App Container -->
-    <div id="app-interface" class="container">
+    <!-- 2. MAIN APP (Screen 2) -->
+    <div id="app-interface">
+        
+        <!-- CALENDAR PAGE -->
         <div id="calendar-page">
             <div class="header">
                 <h2 id="welcome-msg">Namaste</h2>
-                <button onclick="logout()" style="background:#333; color:#ff4444; padding: 8px 12px;">Logout</button>
+                <button onclick="logout()" style="background:#333; color:#ff4444;">Logout</button>
             </div>
-            <span class="vikram-label" id="vikram-year">Vikram Samvat 2080</span>
             <div id="calendar"></div>
         </div>
 
+        <!-- DIARY ENTRY PAGE -->
         <div id="note-page">
-            <div class="toolbar">
+            <div class="header">
                 <button class="btn-back" onclick="showCalendar()">← Back</button>
                 <h3 id="display-date" style="margin:0; color:var(--accent);">Date</h3>
             </div>
             
-            <div id="holiday-info" class="holiday-note"></div>
+            <p id="holiday-info" style="color:var(--holiday); font-weight:bold; margin-bottom:10px;"></p>
             <input type="text" id="highlight" class="highlight" placeholder="Daily Highlight (ટૂંકમાં વિગત)">
             
             <div id="editor"></div>
             
             <button class="btn-voice" onclick="startSpeech()">🎤 Speak in Gujarati</button>
             <button class="btn-save" onclick="saveEntry()">Save Entry</button>
-            <p id="status-msg" style="text-align: center; font-size: 12px; color: #03dac6;"></p>
+            <p id="status-msg" style="text-align: center; color: #03dac6; margin-top: 10px;"></p>
         </div>
+
     </div>
 
     <script>
-        // --- YOUR CONFIG GOES HERE ---
+        // --- FIREBASE CONFIG ---
         const firebaseConfig = {
   apiKey: "AIzaSyCxWGAjeG5OTK1XkpwqtCCmLIz2UN8vAps",
   authDomain: "nirajk-diary.firebaseapp.com",
@@ -133,28 +125,17 @@
         const indianHolidays = [
             { title: "🇮🇳 Republic Day", start: "2024-01-26", className: "holiday-event" },
             { title: "🎨 Holi", start: "2024-03-25", className: "holiday-event" },
-            { title: "🙏 Ram Navami", start: "2024-04-17", className: "holiday-event" },
             { title: "🇮🇳 Independence Day", start: "2024-08-15", className: "holiday-event" },
             { title: "🕉️ Ganesh Chaturthi", start: "2024-09-07", className: "holiday-event" },
-            { title: "👓 Gandhi Jayanti", start: "2024-10-02", className: "holiday-event" },
             { title: "🪔 Diwali", start: "2024-10-31", className: "holiday-event" },
-            { title: "🎇 New Year (Guj)", start: "2024-11-02", className: "holiday-event" },
-            { title: "🎄 Christmas", start: "2024-12-25", className: "holiday-event" },
-            { title: "🪁 Uttarayan", start: "2025-01-14", className: "holiday-event" }
+            { title: "🪁 Uttarayan", start: "2025-01-14", className: "holiday-event" },
+            { title: "🇮🇳 Republic Day", start: "2025-01-26", className: "holiday-event" }
         ];
 
         quill = new Quill('#editor', {
             theme: 'snow',
             modules: { toolbar: [['bold', 'italic', 'underline'], [{'list': 'bullet'}]] }
         });
-
-        // Calculate Vikram Samvat Year
-        function getVikramSamvat() {
-            const year = new Date().getFullYear();
-            // Vikram Samvat is approximately Gregorian Year + 57
-            return `Vikram Samvat ${year + 57}`;
-        }
-        document.getElementById('vikram-year').innerText = getVikramSamvat();
 
         function initCalendar() {
             const calendarEl = document.getElementById('calendar');
@@ -177,16 +158,21 @@
             calendar.render();
         }
 
-        // --- CORE FUNCTIONS ---
+        // Authentication Logic
         function login() { auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()); }
         function logout() { auth.signOut(); location.reload(); }
 
         auth.onAuthStateChanged(user => {
+            const loginPage = document.getElementById('login-page');
+            const appInterface = document.getElementById('app-interface');
             if (user) {
-                document.getElementById('login-page').style.display = 'none';
-                document.getElementById('app-interface').style.display = 'block';
+                loginPage.style.display = 'none'; // Completely hide login
+                appInterface.style.display = 'block'; // Show app
                 document.getElementById('welcome-msg').innerText = "Namaste, " + user.displayName.split(' ')[0];
                 initCalendar();
+            } else {
+                loginPage.style.display = 'flex';
+                appInterface.style.display = 'none';
             }
         });
 
@@ -196,7 +182,6 @@
             document.getElementById('note-page').style.display = 'block';
             document.getElementById('display-date').innerText = date;
             
-            // Show if it's a holiday
             const hol = indianHolidays.find(h => h.start === date);
             document.getElementById('holiday-info').innerText = hol ? "Holiday: " + hol.title : "";
             
@@ -230,6 +215,7 @@
                 highlight: document.getElementById('highlight').value
             });
             document.getElementById('status-msg').innerText = "Saved Successfully!";
+            setTimeout(() => { document.getElementById('status-msg').innerText = ""; }, 2000);
         }
 
         function startSpeech() {
