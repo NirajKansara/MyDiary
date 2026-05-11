@@ -2,10 +2,10 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dark Diary + Gujarati Voice</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Niraj's Indian Diary</title>
     
-    <!-- Firebase & Tools -->
+    <!-- Libraries -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
@@ -14,99 +14,104 @@
     <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
 
     <style>
-        /* DARK THEME STYLING */
         :root { 
-            --bg-dark: #121212; 
-            --card-dark: #1e1e1e; 
-            --text-light: #e0e0e0; 
-            --accent: #bb86fc; 
-            --primary-btn: #03dac6;
+            --bg: #0f0f0f; 
+            --card: #1a1a1a; 
+            --accent: #bc8cf2; 
+            --holiday: #ff9933; /* Saffron for Indian Holidays */
+            --text: #ffffff;
         }
-        body, html { margin: 0; padding: 0; height: 100%; font-family: 'Segoe UI', sans-serif; background: var(--bg-dark); color: var(--text-light); }
-
-        /* Login Page */
-        #login-page {
-            height: 100vh; display: flex; justify-content: center; align-items: center;
-            background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('https://images.unsplash.com/photo-1493246507139-91e8bef99c02?auto=format&fit=crop&w=1600&q=80');
-            background-size: cover;
+        
+        body { 
+            margin: 0; padding: 0; background: var(--bg); color: var(--text);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            overflow-x: hidden;
         }
-        .login-box { background: var(--card-dark); padding: 40px; border-radius: 20px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 1px solid #333; }
-        
-        /* App Layout */
-        #app-interface { display: none; padding: 20px; }
-        .container { max-width: 900px; margin: auto; background: var(--card-dark); padding: 20px; border-radius: 15px; border: 1px solid #333; }
-        
-        /* Calendar Dark Overrides */
-        .fc { background: var(--card-dark); color: var(--text-light); border-radius: 10px; padding: 10px; }
-        .fc-toolbar-title { color: var(--accent); }
-        .fc-daygrid-day:hover { background: #2a2a2a !important; cursor: pointer; }
-        .fc-list-day-cushion { background: #333 !important; }
-        .fc-event { background-color: var(--accent) !important; color: #000 !important; font-weight: bold; border: none; }
 
-        /* Editor Dark Overrides */
-        .ql-toolbar { background: #333; border-color: #444 !important; }
-        .ql-container { border-color: #444 !important; background: #252525; color: white; font-size: 18px; }
-        .ql-snow .ql-stroke { stroke: white !important; }
+        /* Responsive Container */
+        .container { width: 100%; max-width: 600px; margin: auto; padding: 10px; box-sizing: border-box; }
+
+        /* Login Screen */
+        #login-page { height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('https://images.unsplash.com/photo-1532375810709-75b1da00537c?auto=format&fit=crop&w=800&q=80'); background-size: cover; }
         
-        #note-page { display: none; }
-        .toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
+        /* Header Area */
+        .header { display: flex; justify-content: space-between; align-items: center; padding: 15px 5px; }
+        .header h2 { font-size: 1.4rem; color: var(--accent); margin: 0; }
+
+        /* Calendar Styling */
+        #calendar { background: var(--card); border-radius: 15px; padding: 10px; border: 1px solid #333; height: auto; }
+        .fc .fc-toolbar-title { font-size: 1.1rem !important; color: var(--accent); }
+        .fc .fc-button { background: #333; border: none; text-transform: capitalize; }
+        .fc .fc-daygrid-day-number { color: #fff; font-size: 0.9rem; padding: 5px; }
         
-        /* Highlight & Voice Buttons */
-        .highlight-input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #444; border-radius: 8px; background: #252525; color: white; box-sizing: border-box; }
-        button { cursor: pointer; border: none; border-radius: 8px; padding: 12px 20px; font-weight: bold; transition: 0.3s; }
-        .btn-main { background: var(--primary-btn); color: #000; }
-        .btn-voice { background: #cf6679; color: white; }
-        .btn-back { background: #444; color: white; }
-        #status-msg { color: var(--primary-btn); font-size: 14px; margin-top: 10px; }
+        /* Event Styling */
+        .fc-event { border: none !important; padding: 2px 5px; font-size: 0.7rem !important; border-radius: 4px !important; }
+        .holiday-event { background-color: var(--holiday) !important; color: white !important; }
+        .diary-event { background-color: var(--accent) !important; color: black !important; font-weight: bold; }
+
+        /* Vikram Samvat Label */
+        .vikram-label { font-size: 0.8rem; color: #aaa; margin-bottom: 10px; display: block; }
+
+        /* Note Page Styling */
+        #note-page { display: none; animation: fadeIn 0.3s; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .toolbar { display: flex; justify-content: space-between; gap: 10px; margin-bottom: 15px; }
+        input.highlight { width: 100%; padding: 12px; background: #252525; border: 1px solid #444; color: white; border-radius: 8px; margin-bottom: 10px; box-sizing: border-box; }
+
+        /* Rich Text Editor for Mobile */
+        .ql-container { height: 250px; background: #252525; border-radius: 0 0 8px 8px; color: white; font-size: 16px; }
+        .ql-toolbar { background: #444; border-radius: 8px 8px 0 0; }
+
+        /* Mobile Buttons */
+        button { padding: 12px 18px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; font-size: 0.9rem; }
+        .btn-save { background: var(--accent); color: black; width: 100%; margin-top: 15px; }
+        .btn-voice { background: #4caf50; color: white; width: 100%; margin-top: 10px; }
+        .btn-back { background: #333; color: white; }
+
+        /* Holiday Indicator */
+        .holiday-note { font-size: 0.8rem; color: var(--holiday); margin-bottom: 5px; font-style: italic; }
     </style>
 </head>
 <body>
 
-    <!-- LOGIN PAGE -->
+    <!-- Login -->
     <div id="login-page">
-        <div class="login-box">
-            <h1 style="color:var(--accent)">My Private Diary</h1>
-            <p>Welcome back. Please sign in.</p>
-            <button class="btn-main" onclick="login()">Login with Google</button>
-        </div>
+        <h1 style="color:var(--accent); font-size: 2.5rem;">મારી ડાયરી</h1>
+        <p style="color: #ccc; padding: 0 20px;">તમારા વિચારોને સુરક્ષિત રાખો.</p>
+        <button style="background: white; color: black; font-size: 1.1rem; padding: 15px 30px;" onclick="login()">Login with Google</button>
     </div>
 
-    <!-- APP INTERFACE -->
-    <div id="app-interface">
-        <div class="container">
+    <!-- App Container -->
+    <div id="app-interface" class="container">
+        <div id="calendar-page">
+            <div class="header">
+                <h2 id="welcome-msg">Namaste</h2>
+                <button onclick="logout()" style="background:#333; color:#ff4444; padding: 8px 12px;">Logout</button>
+            </div>
+            <span class="vikram-label" id="vikram-year">Vikram Samvat 2080</span>
+            <div id="calendar"></div>
+        </div>
+
+        <div id="note-page">
+            <div class="toolbar">
+                <button class="btn-back" onclick="showCalendar()">← Back</button>
+                <h3 id="display-date" style="margin:0; color:var(--accent);">Date</h3>
+            </div>
             
-            <!-- CALENDAR VIEW -->
-            <div id="calendar-page">
-                <div class="toolbar">
-                    <h2 id="welcome-msg" style="color:var(--accent)">Diary</h2>
-                    <button onclick="logout()" style="background:#444; color: white;">Logout</button>
-                </div>
-                <div id="calendar"></div>
-            </div>
-
-            <!-- NOTE ENTRY VIEW -->
-            <div id="note-page">
-                <div class="toolbar">
-                    <button class="btn-back" onclick="showCalendar()">← Back</button>
-                    <h3 id="display-date" style="color:var(--accent)">Date</h3>
-                    <button class="btn-main" onclick="saveEntry()">Save to Cloud</button>
-                </div>
-                
-                <input type="text" id="highlight" class="highlight-input" placeholder="Daily Highlight (e.g. આજે બગીચામાં ગયા)">
-                
-                <div style="margin-bottom: 10px;">
-                    <button class="btn-voice" id="voice-btn" onclick="startSpeech()">🎤 Speak in Gujarati</button>
-                    <span id="voice-status" style="margin-left:10px; font-size:12px; color:#bbb;"></span>
-                </div>
-
-                <div id="editor"></div>
-                <p id="status-msg"></p>
-            </div>
-
+            <div id="holiday-info" class="holiday-note"></div>
+            <input type="text" id="highlight" class="highlight" placeholder="Daily Highlight (ટૂંકમાં વિગત)">
+            
+            <div id="editor"></div>
+            
+            <button class="btn-voice" onclick="startSpeech()">🎤 Speak in Gujarati</button>
+            <button class="btn-save" onclick="saveEntry()">Save Entry</button>
+            <p id="status-msg" style="text-align: center; font-size: 12px; color: #03dac6;"></p>
         </div>
     </div>
 
     <script>
+        // --- YOUR CONFIG GOES HERE ---
         const firebaseConfig = {
   apiKey: "AIzaSyCxWGAjeG5OTK1XkpwqtCCmLIz2UN8vAps",
   authDomain: "nirajk-diary.firebaseapp.com",
@@ -116,7 +121,6 @@
   appId: "1:716509879684:web:f49ffa26687e1b3ce291d1"
 };
 
-
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.firestore();
@@ -125,77 +129,56 @@
         let quill;
         let calendar;
 
-        // Initialize Dark Rich Text Editor
+        // Indian Holidays List 2024-2025
+        const indianHolidays = [
+            { title: "🇮🇳 Republic Day", start: "2024-01-26", className: "holiday-event" },
+            { title: "🎨 Holi", start: "2024-03-25", className: "holiday-event" },
+            { title: "🙏 Ram Navami", start: "2024-04-17", className: "holiday-event" },
+            { title: "🇮🇳 Independence Day", start: "2024-08-15", className: "holiday-event" },
+            { title: "🕉️ Ganesh Chaturthi", start: "2024-09-07", className: "holiday-event" },
+            { title: "👓 Gandhi Jayanti", start: "2024-10-02", className: "holiday-event" },
+            { title: "🪔 Diwali", start: "2024-10-31", className: "holiday-event" },
+            { title: "🎇 New Year (Guj)", start: "2024-11-02", className: "holiday-event" },
+            { title: "🎄 Christmas", start: "2024-12-25", className: "holiday-event" },
+            { title: "🪁 Uttarayan", start: "2025-01-14", className: "holiday-event" }
+        ];
+
         quill = new Quill('#editor', {
             theme: 'snow',
-            modules: { toolbar: [[{'header': [1, 2, false]}], ['bold', 'italic', 'underline'], [{'list': 'ordered'}, {'list': 'bullet'}]] }
+            modules: { toolbar: [['bold', 'italic', 'underline'], [{'list': 'bullet'}]] }
         });
 
-        // --- GUJARATI SPEECH TO TEXT LOGIC ---
-        function startSpeech() {
-            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            if (!SpeechRecognition) {
-                alert("Your browser does not support voice typing. Please use Chrome on Android/Desktop.");
-                return;
-            }
-
-            const recognition = new SpeechRecognition();
-            recognition.lang = 'gu-IN'; // SET TO GUJARATI
-            recognition.interimResults = false;
-
-            const voiceBtn = document.getElementById('voice-btn');
-            const voiceStatus = document.getElementById('voice-status');
-
-            recognition.onstart = () => {
-                voiceBtn.innerText = "🛑 Listening...";
-                voiceStatus.innerText = "બોલો, હું સાંભળું છું... (Speak now)";
-            };
-
-            recognition.onresult = (event) => {
-                const transcript = event.results[0][0].transcript;
-                // Insert the spoken text into the editor
-                const range = quill.getSelection();
-                quill.insertText(range ? range.index : quill.getLength(), transcript + " ");
-                voiceStatus.innerText = "Text added!";
-            };
-
-            recognition.onerror = () => { voiceStatus.innerText = "Error occurred."; };
-            recognition.onend = () => {
-                voiceBtn.innerText = "🎤 Speak in Gujarati";
-                voiceStatus.innerText = "";
-            };
-
-            recognition.start();
+        // Calculate Vikram Samvat Year
+        function getVikramSamvat() {
+            const year = new Date().getFullYear();
+            // Vikram Samvat is approximately Gregorian Year + 57
+            return `Vikram Samvat ${year + 57}`;
         }
+        document.getElementById('vikram-year').innerText = getVikramSamvat();
 
-        // --- APP LOGIC ---
         function initCalendar() {
             const calendarEl = document.getElementById('calendar');
             calendar = new FullCalendar.Calendar(calendarEl, {
                 initialView: 'dayGridMonth',
-                headerToolbar: { left: 'prev,next today', center: 'title', right: '' },
+                height: 'auto',
+                headerToolbar: { left: 'prev,next', center: 'title', right: 'today' },
                 dateClick: (info) => openDiary(info.dateStr),
-                events: fetchHighlights
+                events: async function(info, success) {
+                    const user = auth.currentUser;
+                    const snapshot = await db.collection("diaryEntries").where("uid", "==", user.uid).get();
+                    const userEvents = snapshot.docs.map(doc => ({
+                        title: doc.data().highlight || "📄 Log",
+                        start: doc.data().date,
+                        className: "diary-event"
+                    }));
+                    success([...indianHolidays, ...userEvents]);
+                }
             });
             calendar.render();
         }
 
-        async function fetchHighlights(fetchInfo, successCallback) {
-            const user = auth.currentUser;
-            if(!user) return;
-            const snapshot = await db.collection("diaryEntries").where("uid", "==", user.uid).get();
-            const events = snapshot.docs.map(doc => ({
-                title: doc.data().highlight || "📄",
-                start: doc.data().date,
-                allDay: true
-            }));
-            successCallback(events);
-        }
-
-        function login() {
-            const provider = new firebase.auth.GoogleAuthProvider();
-            auth.signInWithPopup(provider);
-        }
+        // --- CORE FUNCTIONS ---
+        function login() { auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()); }
         function logout() { auth.signOut(); location.reload(); }
 
         auth.onAuthStateChanged(user => {
@@ -212,6 +195,11 @@
             document.getElementById('calendar-page').style.display = 'none';
             document.getElementById('note-page').style.display = 'block';
             document.getElementById('display-date').innerText = date;
+            
+            // Show if it's a holiday
+            const hol = indianHolidays.find(h => h.start === date);
+            document.getElementById('holiday-info').innerText = hol ? "Holiday: " + hol.title : "";
+            
             loadEntry(date);
         }
 
@@ -223,8 +211,7 @@
 
         async function loadEntry(date) {
             const user = auth.currentUser;
-            const docId = `${user.uid}_${date}`;
-            const doc = await db.collection("diaryEntries").doc(docId).get();
+            const doc = await db.collection("diaryEntries").doc(`${user.uid}_${date}`).get();
             if (doc.exists) {
                 quill.root.innerHTML = doc.data().text;
                 document.getElementById('highlight').value = doc.data().highlight || "";
@@ -236,19 +223,24 @@
 
         async function saveEntry() {
             const user = auth.currentUser;
-            const docId = `${user.uid}_${selectedDate}`;
-            const status = document.getElementById('status-msg');
-            status.innerText = "Saving...";
-            
-            await db.collection("diaryEntries").doc(docId).set({
-                uid: user.uid,
-                date: selectedDate,
+            document.getElementById('status-msg').innerText = "Saving...";
+            await db.collection("diaryEntries").doc(`${user.uid}_${selectedDate}`).set({
+                uid: user.uid, date: selectedDate,
                 text: quill.root.innerHTML,
-                highlight: document.getElementById('highlight').value,
-                lastSaved: firebase.firestore.FieldValue.serverTimestamp()
+                highlight: document.getElementById('highlight').value
             });
-            status.innerText = "Saved to Cloud!";
-            setTimeout(() => { status.innerText = ""; }, 2000);
+            document.getElementById('status-msg').innerText = "Saved Successfully!";
+        }
+
+        function startSpeech() {
+            const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+            recognition.lang = 'gu-IN';
+            recognition.onstart = () => { document.getElementById('status-msg').innerText = "Listening Gujarati..."; };
+            recognition.onresult = (event) => {
+                const text = event.results[0][0].transcript;
+                quill.insertText(quill.getLength(), " " + text);
+            };
+            recognition.start();
         }
     </script>
 </body>
