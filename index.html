@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>My Private Diary</title>
+    <title>My Professional Private Diary</title>
     
     <!-- Libraries -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
@@ -15,96 +15,134 @@
 
     <style>
         :root { 
-            --bg: #121212; 
-            --card: #1e1e1e; 
-            --accent: #bb86fc; 
+            --bg: #0f0f0f; 
+            --card: #1a1a1a; 
+            --accent: #bc8cf2; 
             --holiday: #ff9933; 
-            --text: #e0e0e0;
+            --text: #ffffff;
+            --btn-voice: #4caf50;
         }
         
-        body, html { margin: 0; padding: 0; height: 100%; background: var(--bg); color: var(--text); font-family: sans-serif; }
+        body, html { 
+            margin: 0; padding: 0; height: 100%; background: var(--bg); color: var(--text); 
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
 
-        /* FIXED OVERLAP: The Login page takes full screen */
+        /* 1. LOGIN PAGE STYLING */
         #login-page { 
             height: 100vh; width: 100%;
             display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;
-            background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), 
+            background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), 
                         url('https://images.unsplash.com/photo-1517842645767-c639042777db?auto=format&fit=crop&w=1200&q=80'); 
             background-size: cover; background-position: center;
-            position: fixed; top: 0; left: 0; z-index: 100;
+            position: fixed; top: 0; left: 0; z-index: 1000;
         }
-        
-        /* App Container - Hidden by default */
-        #app-interface { display: none; padding: 15px; max-width: 600px; margin: auto; }
 
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .header h2 { color: var(--accent); margin: 0; }
+        /* 2. RESPONSIVE CONTAINER (Applied to both pages) */
+        .app-container { 
+            max-width: 800px; /* Limits width on Desktop */
+            margin: auto; 
+            padding: 20px; 
+            box-sizing: border-box;
+        }
 
-        /* Calendar */
-        #calendar { background: var(--card); border-radius: 12px; padding: 10px; border: 1px solid #333; }
-        .fc .fc-toolbar-title { font-size: 1.1rem !important; color: var(--accent); }
-        .fc-daygrid-day-number { color: white !important; text-decoration: none; }
-        
-        /* Events */
-        .holiday-event { background-color: var(--holiday) !important; color: white !important; border: none !important; font-size: 0.7rem; }
-        .diary-event { background-color: var(--accent) !important; color: black !important; border: none !important; font-weight: bold; }
+        #app-interface { display: none; }
 
-        /* Note Page */
+        /* Header Layout */
+        .toolbar { 
+            display: flex; justify-content: space-between; align-items: center; 
+            margin-bottom: 20px; gap: 10px;
+        }
+        .date-display { font-size: 1.2rem; font-weight: bold; color: var(--accent); }
+
+        /* Calendar Box */
+        #calendar { background: var(--card); border-radius: 15px; padding: 15px; border: 1px solid #333; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+        .fc .fc-toolbar-title { font-size: 1.2rem !important; color: var(--accent); }
+        .fc-daygrid-day-number { color: white !important; text-decoration: none !important; }
+
+        /* Diary Entry Components */
         #note-page { display: none; }
-        input.highlight { width: 100%; padding: 12px; background: #252525; border: 1px solid #444; color: white; border-radius: 8px; margin-bottom: 10px; box-sizing: border-box; font-size: 16px; }
-        .ql-container { height: 250px; background: #252525; color: white; border-radius: 0 0 8px 8px; }
-        .ql-toolbar { background: #eee; border-radius: 8px 8px 0 0; }
+        input.highlight-box { 
+            width: 100%; padding: 15px; background: #222; border: 1px solid #444; 
+            color: white; border-radius: 10px; margin-bottom: 15px; box-sizing: border-box; font-size: 1rem;
+        }
 
-        button { padding: 12px 20px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; }
-        .btn-login { background: white; color: black; font-size: 1.1rem; padding: 15px 40px; }
-        .btn-save { background: var(--accent); color: black; width: 100%; margin-top: 10px; }
-        .btn-voice { background: #4caf50; color: white; width: 100%; margin-top: 10px; }
+        /* Rich Text Editor Styling */
+        #editor-wrapper { border-radius: 10px; overflow: hidden; border: 1px solid #444; }
+        .ql-toolbar { background: #eee !important; border: none !important; }
+        .ql-container { height: 350px; background: #222; color: white; border: none !important; font-size: 1.1rem; }
+
+        /* Buttons Styling */
+        button { 
+            padding: 12px 24px; border-radius: 8px; border: none; font-weight: bold; 
+            cursor: pointer; transition: 0.2s; font-size: 1rem;
+        }
         .btn-back { background: #333; color: white; }
+        .btn-save { background: var(--accent); color: black; flex-grow: 1; }
+        .btn-voice { background: var(--btn-voice); color: white; flex-grow: 1; }
+        .button-group { display: flex; gap: 10px; margin-top: 20px; width: 100%; }
+
+        /* Mobile Adjustments */
+        @media (max-width: 600px) {
+            .app-container { padding: 10px; }
+            .button-group { flex-direction: column; }
+            .ql-container { height: 300px; }
+            .date-display { font-size: 1rem; }
+        }
     </style>
 </head>
 <body>
 
-    <!-- 1. LOGIN PAGE (Screen 1) -->
+    <!-- SCREEN 1: LOGIN -->
     <div id="login-page">
-        <h1 style="color:white; font-size: 2.5rem; margin-bottom: 10px;">મારી ડાયરી</h1>
-        <p style="color: #ddd; margin-bottom: 30px;">તમારા વિચારોને સુરક્ષિત રાખો.</p>
-        <button class="btn-login" onclick="login()">Login with Google</button>
+        <h1 style="color:white; font-size: 3rem; margin: 0;">મારી ડાયરી</h1>
+        <p style="color: #ccc; margin-bottom: 30px;">તમારા વિચારોને સુરક્ષિત રાખો.</p>
+        <button style="background: white; color: black; padding: 15px 40px; font-size: 1.2rem;" onclick="login()">Login with Google</button>
     </div>
 
-    <!-- 2. MAIN APP (Screen 2) -->
+    <!-- SCREEN 2: THE APP -->
     <div id="app-interface">
         
-        <!-- CALENDAR PAGE -->
-        <div id="calendar-page">
-            <div class="header">
-                <h2 id="welcome-msg">Namaste</h2>
-                <button onclick="logout()" style="background:#333; color:#ff4444;">Logout</button>
-            </div>
-            <div id="calendar"></div>
-        </div>
+        <!-- THE WRAPPER THAT CENTERS EVERYTHING -->
+        <div class="app-container">
 
-        <!-- DIARY ENTRY PAGE -->
-        <div id="note-page">
-            <div class="header">
-                <button class="btn-back" onclick="showCalendar()">← Back</button>
-                <h3 id="display-date" style="margin:0; color:var(--accent);">Date</h3>
+            <!-- PAGE: CALENDAR -->
+            <div id="calendar-page">
+                <div class="toolbar">
+                    <h2 style="color:var(--accent); margin:0;">Namaste!</h2>
+                    <button onclick="logout()" style="background:#333; color:#ff4444;">Logout</button>
+                </div>
+                <div id="calendar"></div>
             </div>
-            
-            <p id="holiday-info" style="color:var(--holiday); font-weight:bold; margin-bottom:10px;"></p>
-            <input type="text" id="highlight" class="highlight" placeholder="Daily Highlight (ટૂંકમાં વિગત)">
-            
-            <div id="editor"></div>
-            
-            <button class="btn-voice" onclick="startSpeech()">🎤 Speak in Gujarati</button>
-            <button class="btn-save" onclick="saveEntry()">Save Entry</button>
-            <p id="status-msg" style="text-align: center; color: #03dac6; margin-top: 10px;"></p>
-        </div>
 
+            <!-- PAGE: DIARY ENTRY -->
+            <div id="note-page">
+                <div class="toolbar">
+                    <button class="btn-back" onclick="showCalendar()">← Back</button>
+                    <div id="display-date" class="date-display">Date</div>
+                </div>
+
+                <p id="holiday-info" style="color:var(--holiday); font-weight:bold; margin-bottom:10px;"></p>
+                
+                <input type="text" id="highlight" class="highlight-box" placeholder="Daily Highlight (ટૂંકમાં વિગત)">
+                
+                <div id="editor-wrapper">
+                    <div id="editor"></div>
+                </div>
+                
+                <div class="button-group">
+                    <button class="btn-voice" onclick="startSpeech()">🎤 Speak in Gujarati</button>
+                    <button class="btn-save" onclick="saveEntry()">Save Entry</button>
+                </div>
+                <p id="status-msg" style="text-align: center; color: #03dac6; margin-top: 15px; font-weight: bold;"></p>
+            </div>
+
+        </div>
     </div>
 
     <script>
         // --- FIREBASE CONFIG ---
-        const firebaseConfig = {
+         const firebaseConfig = {
   apiKey: "AIzaSyCxWGAjeG5OTK1XkpwqtCCmLIz2UN8vAps",
   authDomain: "nirajk-diary.firebaseapp.com",
   projectId: "nirajk-diary",
@@ -112,7 +150,6 @@
   messagingSenderId: "716509879684",
   appId: "1:716509879684:web:f49ffa26687e1b3ce291d1"
 };
-
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.firestore();
@@ -121,12 +158,10 @@
         let quill;
         let calendar;
 
-        // Indian Holidays List 2024-2025
         const indianHolidays = [
             { title: "🇮🇳 Republic Day", start: "2024-01-26", className: "holiday-event" },
             { title: "🎨 Holi", start: "2024-03-25", className: "holiday-event" },
             { title: "🇮🇳 Independence Day", start: "2024-08-15", className: "holiday-event" },
-            { title: "🕉️ Ganesh Chaturthi", start: "2024-09-07", className: "holiday-event" },
             { title: "🪔 Diwali", start: "2024-10-31", className: "holiday-event" },
             { title: "🪁 Uttarayan", start: "2025-01-14", className: "holiday-event" },
             { title: "🇮🇳 Republic Day", start: "2025-01-26", className: "holiday-event" }
@@ -150,7 +185,9 @@
                     const userEvents = snapshot.docs.map(doc => ({
                         title: doc.data().highlight || "📄 Log",
                         start: doc.data().date,
-                        className: "diary-event"
+                        backgroundColor: '#bc8cf2',
+                        borderColor: '#bc8cf2',
+                        textColor: 'black'
                     }));
                     success([...indianHolidays, ...userEvents]);
                 }
@@ -158,21 +195,17 @@
             calendar.render();
         }
 
-        // Authentication Logic
         function login() { auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()); }
         function logout() { auth.signOut(); location.reload(); }
 
         auth.onAuthStateChanged(user => {
-            const loginPage = document.getElementById('login-page');
-            const appInterface = document.getElementById('app-interface');
             if (user) {
-                loginPage.style.display = 'none'; // Completely hide login
-                appInterface.style.display = 'block'; // Show app
-                document.getElementById('welcome-msg').innerText = "Namaste, " + user.displayName.split(' ')[0];
+                document.getElementById('login-page').style.display = 'none';
+                document.getElementById('app-interface').style.display = 'block';
                 initCalendar();
             } else {
-                loginPage.style.display = 'flex';
-                appInterface.style.display = 'none';
+                document.getElementById('login-page').style.display = 'flex';
+                document.getElementById('app-interface').style.display = 'none';
             }
         });
 
@@ -181,10 +214,8 @@
             document.getElementById('calendar-page').style.display = 'none';
             document.getElementById('note-page').style.display = 'block';
             document.getElementById('display-date').innerText = date;
-            
             const hol = indianHolidays.find(h => h.start === date);
             document.getElementById('holiday-info').innerText = hol ? "Holiday: " + hol.title : "";
-            
             loadEntry(date);
         }
 
@@ -208,24 +239,25 @@
 
         async function saveEntry() {
             const user = auth.currentUser;
-            document.getElementById('status-msg').innerText = "Saving...";
+            document.getElementById('status-msg').innerText = "Saving to Cloud...";
             await db.collection("diaryEntries").doc(`${user.uid}_${selectedDate}`).set({
                 uid: user.uid, date: selectedDate,
                 text: quill.root.innerHTML,
                 highlight: document.getElementById('highlight').value
             });
-            document.getElementById('status-msg').innerText = "Saved Successfully!";
-            setTimeout(() => { document.getElementById('status-msg').innerText = ""; }, 2000);
+            document.getElementById('status-msg').innerText = "✓ Saved Successfully!";
+            setTimeout(() => { document.getElementById('status-msg').innerText = ""; }, 3000);
         }
 
         function startSpeech() {
             const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
             recognition.lang = 'gu-IN';
-            recognition.onstart = () => { document.getElementById('status-msg').innerText = "Listening Gujarati..."; };
+            recognition.onstart = () => { document.getElementById('status-msg').innerText = "Listening Gujarati... બોલો..."; };
             recognition.onresult = (event) => {
                 const text = event.results[0][0].transcript;
                 quill.insertText(quill.getLength(), " " + text);
             };
+            recognition.onend = () => { document.getElementById('status-msg').innerText = ""; };
             recognition.start();
         }
     </script>
