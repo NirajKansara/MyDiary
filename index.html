@@ -3,7 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>AI Diary Pro</title>
+    <title>મારી ડાયરી</title>
+    
+    <!-- Fonts: Caveat for English, Farsan for Gujarati Stylized -->
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&family=Farsan&display=swap" rel="stylesheet">
     
     <!-- Libraries -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
@@ -14,113 +17,125 @@
     <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
 
     <style>
-        :root { --bg: #0f0f0f; --card: #1a1a1a; --accent: #bc8cf2; --text: #ffffff; --ai-color: #4285f4; }
-        body, html { margin: 0; padding: 0; background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; }
+        :root { 
+            --glass: rgba(0, 0, 0, 0.75); 
+            --accent: #ffeb3b; 
+            --text: #ffffff;
+        }
         
-        .app-container { max-width: 800px; margin: auto; padding: 15px; box-sizing: border-box; }
-        
-        /* Login Screen */
+        body, html { 
+            margin: 0; padding: 0; height: 100%; 
+            font-family: 'Caveat', 'Farsan', cursive; 
+            background: #000; color: var(--text);
+            background-attachment: fixed;
+            background-size: cover;
+            background-position: center;
+            transition: background-image 1s ease-in-out;
+        }
+
+        /* 1. LOGIN SCREEN */
         #login-page { 
-            height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;
-            background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('https://images.unsplash.com/photo-1517842645767-c639042777db?auto=format&fit=crop&w=1200&q=80');
-            background-size: cover; position: fixed; top: 0; left: 0; width: 100%; z-index: 2000;
+            height: 100vh; width: 100%;
+            display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;
+            background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), 
+                        url('https://images.unsplash.com/photo-1517842645767-c639042777db?auto=format&fit=crop&w=1200&q=80'); 
+            background-size: cover; background-position: center;
+            position: fixed; top: 0; left: 0; z-index: 2000;
         }
 
+        /* 2. APP UI */
         #app-interface { display: none; }
-        #note-page { display: none; }
-
-        /* AI Insight Box Styling */
-        .ai-display-box { 
-            background: rgba(66, 133, 244, 0.15); border: 1px solid var(--ai-color); 
-            padding: 15px; border-radius: 12px; margin: 15px 0; display: none;
-            animation: slideDown 0.4s ease;
+        .app-container { 
+            max-width: 800px; margin: auto; padding: 15px; box-sizing: border-box; 
+            background: var(--glass); min-height: 100vh;
+            box-shadow: 0 0 50px rgba(0,0,0,1);
         }
-        @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Calendar Styling */
-        #calendar { background: var(--card); border-radius: 15px; padding: 10px; border: 1px solid #333; }
-        .fc-daygrid-day-number { color: white !important; text-decoration: none !important; }
+        /* Digital Clock */
+        #digital-clock {
+            text-align: right; font-size: 1.5rem; color: var(--accent);
+            padding: 10px; font-weight: bold; letter-spacing: 2px;
+        }
 
-        /* Input & Editor */
-        input.highlight-box { width: 100%; padding: 15px; background: #222; border: 1px solid #444; color: white; border-radius: 10px; margin-bottom: 10px; box-sizing: border-box; font-size: 1rem; }
-        .ql-container { height: 300px; background: #222; color: white; border-radius: 0 0 10px 10px; }
-        .ql-toolbar { background: #eee !important; border-radius: 10px 10px 0 0; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .header h2 { font-family: 'Farsan', cursive; font-size: 2.5rem; color: var(--accent); margin: 0; }
+
+        /* Calendar */
+        #calendar { background: rgba(255,255,255,0.1); border-radius: 15px; padding: 10px; border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(10px); }
+        .fc-daygrid-day-number { color: white !important; font-size: 1.2rem !important; text-decoration: none !important; }
+        .fc-col-header-cell-cushion { font-size: 1.1rem; color: var(--accent); }
+
+        /* Writing Page */
+        #note-page { display: none; }
+        input.highlight-box { 
+            width: 100%; padding: 15px; background: rgba(255,255,255,0.1); border: 1px solid #555; 
+            color: white; border-radius: 10px; margin-bottom: 15px; box-sizing: border-box; 
+            font-size: 1.5rem; font-family: 'Farsan', cursive;
+        }
+        
+        #editor-container { border-radius: 10px; overflow: hidden; }
+        .ql-editor { font-family: 'Caveat', 'Farsan', cursive; font-size: 1.8rem; min-height: 300px; color: white; background: rgba(0,0,0,0.4); }
+        .ql-toolbar { background: #fff !important; border-radius: 10px 10px 0 0; }
 
         /* Buttons */
-        button { padding: 12px 20px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; transition: 0.3s; }
-        .btn-ai { background: var(--ai-color); color: white; margin-top: 10px; width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; }
-        .btn-save { background: var(--accent); color: black; width: 100%; margin-top: 10px; }
+        button { padding: 12px 20px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; font-family: 'Caveat', sans-serif; font-size: 1.2rem; }
+        .btn-save { background: var(--accent); color: black; width: 100%; margin-top: 15px; font-size: 1.5rem; }
         .btn-voice { background: #4caf50; color: white; width: 100%; margin-top: 10px; }
         .btn-back { background: #333; color: white; }
         .btn-logout { background: #333; color: #ff4444; }
 
-        .toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        @media (max-width: 600px) { .header h2 { font-size: 1.8rem; } #digital-clock { font-size: 1.2rem; } }
     </style>
 </head>
 <body>
 
     <!-- SCREEN 1: LOGIN -->
     <div id="login-page">
-        <h1 style="color:white; font-size: 3rem; margin: 0;">મારી ડાયરી AI</h1>
-        <p style="color: #ccc; margin-bottom: 30px;">AI ની મદદથી તમારા વિચારોને સમજો.</p>
-        <button style="background: white; color: black; padding: 15px 40px; font-size: 1.2rem;" onclick="login()">Login with Google</button>
+        <h1 style="color:white; font-size: 4rem; margin: 0; font-family: 'Farsan';">મારી ડાયરી</h1>
+        <p style="color: #eee; margin-bottom: 30px; font-size: 1.5rem;">તમારા અનુભવોને શબ્દોમાં કંડારો.</p>
+        <button style="background: var(--accent); color: black; padding: 15px 40px; font-size: 1.5rem;" onclick="login()">Login with Google</button>
     </div>
 
     <!-- MAIN APP CONTAINER -->
     <div id="app-interface">
         <div class="app-container">
             
+            <!-- Digital Clock (On all internal pages) -->
+            <div id="digital-clock">00:00:00 AM</div>
+
             <!-- PAGE 1: CALENDAR -->
             <div id="calendar-page">
-                <div class="toolbar">
-                    <h2 style="color:var(--accent); margin:0;">નમસ્તે!</h2>
+                <div class="header">
+                    <h2>નમસ્તે, નીરજ</h2>
                     <button class="btn-logout" onclick="logout()">Logout</button>
                 </div>
-
-                <!-- AI Button on Calendar Page -->
-                <button class="btn-ai" id="cal-ai-btn" onclick="analyzeMonth()">
-                    ✨ આ મહિનાનો સારાંશ (AI Monthly Review)
-                </button>
-
-                <div id="cal-ai-box" class="ai-display-box">
-                    <div style="color:var(--ai-color); font-weight:bold;">🤖 Monthly Insight:</div>
-                    <div id="cal-ai-text" style="font-style: italic; margin-top:5px;"></div>
-                </div>
-
-                <div id="calendar" style="margin-top: 15px;"></div>
+                <div id="calendar"></div>
             </div>
 
             <!-- PAGE 2: WRITING PAGE -->
             <div id="note-page">
-                <div class="toolbar">
+                <div class="header">
                     <button class="btn-back" onclick="showCalendar()">← Back</button>
-                    <div id="display-date" style="color:var(--accent); font-weight:bold;">Date</div>
+                    <div id="display-date" style="color:var(--accent); font-size: 1.5rem;">Date</div>
                 </div>
 
-                <!-- AI Button on Writing Page -->
-                <button class="btn-ai" id="note-ai-btn" onclick="analyzeDay()">
-                    ✨ આજના દિવસ વિશે AI શું કહે છે?
-                </button>
-
-                <div id="note-ai-box" class="ai-display-box">
-                    <div style="color:var(--ai-color); font-weight:bold;">🤖 Daily Insight:</div>
-                    <div id="note-ai-text" style="font-style: italic; margin-top:5px;"></div>
-                </div>
-
-                <input type="text" id="highlight" class="highlight-box" placeholder="Daily Highlight (ટૂંકમાં વિગત)">
-                <div id="editor"></div>
+                <input type="text" id="highlight" class="highlight-box" placeholder="આજના દિવસનો મુખ્ય વિચાર...">
                 
-                <button class="btn-voice" onclick="startSpeech()">🎤 Speak in Gujarati</button>
+                <div id="editor-container">
+                    <div id="editor"></div>
+                </div>
+                
+                <button class="btn-voice" onclick="startSpeech()">🎤 બોલીને લખો (Gujarati Voice)</button>
                 <button class="btn-save" onclick="saveEntry()">Save Entry</button>
-                <p id="status-msg" style="text-align: center; color: #03dac6; margin-top: 10px;"></p>
+                <p id="status-msg" style="text-align: center; color: var(--accent); margin-top: 10px; font-size: 1.2rem;"></p>
             </div>
 
         </div>
     </div>
 
     <script>
-        // --- 1. CONFIGURATION (REPLACE THESE) ---
-  const firebaseConfig = {
+        // --- 1. FIREBASE CONFIG ---
+        const firebaseConfig = {
  apiKey: "AIzaSyCxWGAjeG5OTK1XkpwqtCCmLIz2UN8vAps",
  authDomain: "nirajk-diary.firebaseapp.com",
 projectId: "nirajk-diary",
@@ -129,69 +144,43 @@ projectId: "nirajk-diary",
  appId: "1:716509879684:web:f49ffa26687e1b3ce291d1"
 };
 
-        
-        const GEMINI_API_KEY = "AIzaSyB8iP6-B3vCIAp2PauivDQ7TXAeG2XVkzU";
-
-        // --- 2. INITIALIZATION ---
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.firestore();
+
         let selectedDate = "";
         let quill = new Quill('#editor', { theme: 'snow', modules: { toolbar: [['bold', 'italic', 'underline'], [{'list': 'bullet'}]] } });
         let calendar;
 
-        // --- 3. AI CORE FUNCTION ---
-        async function callGeminiAI(prompt) {
-            try {
-                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
-                });
-
-                const data = await response.json();
-                if (data.error) throw new Error(data.error.message);
-                return data.candidates[0].content.parts[0].text;
-            } catch (error) {
-                console.error(error);
-                return "Error: " + error.message;
-            }
+        // --- 2. SEASONAL BACKGROUNDS LOGIC ---
+        function updateSeasonalBackground() {
+            const month = new Date().getMonth(); // 0 = Jan, 10 = Nov
+            const bgImages = [
+                'https://images.unsplash.com/photo-1502082553048-f009c37129b9?auto=format&fit=crop&w=1200', // Jan: Winter
+                'https://images.unsplash.com/photo-1490750967868-88aa4486c946?auto=format&fit=crop&w=1200', // Feb: Spring
+                'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?auto=format&fit=crop&w=1200', // Mar: Holi/Colors
+                'https://images.unsplash.com/photo-1504386106331-3e4e71712b38?auto=format&fit=crop&w=1200', // Apr: Summer
+                'https://images.unsplash.com/photo-1473496169904-658ba7c44d8a?auto=format&fit=crop&w=1200', // May: Peak Summer
+                'https://images.unsplash.com/photo-1534274988757-a28bf1f539cf?auto=format&fit=crop&w=1200', // Jun: Monsoon
+                'https://images.unsplash.com/photo-1464639351491-a172c2aa2911?auto=format&fit=crop&w=1200', // Jul: Heavy Rain
+                'https://images.unsplash.com/photo-1532375810709-75b1da00537c?auto=format&fit=crop&w=1200', // Aug: Independence/Green
+                'https://images.unsplash.com/photo-1567591974574-e8626308a18b?auto=format&fit=crop&w=1200', // Sep: Ganesh Chaturthi
+                'https://images.unsplash.com/photo-1631522207183-b78809054452?auto=format&fit=crop&w=1200', // Oct: Navratri
+                'https://images.unsplash.com/photo-1514222139-b776b2acf07d?auto=format&fit=crop&w=1200', // Nov: Diwali
+                'https://images.unsplash.com/photo-1483347756197-71ef80e95f73?auto=format&fit=crop&w=1200'  // Dec: Year End
+            ];
+            document.body.style.backgroundImage = `url('${bgImages[month]}')`;
         }
 
-        // --- 4. AI ACTIONS ---
-        async function analyzeDay() {
-            const text = quill.getText().trim();
-            if (text.length < 5) return alert("પહેલા કંઈક લખો!");
-            
-            const box = document.getElementById('note-ai-box');
-            const target = document.getElementById('note-ai-text');
-            box.style.display = "block";
-            target.innerText = "AI વિચારી રહ્યું છે...";
-
-            const result = await callGeminiAI(`Analyze this diary entry: "${text}". Give a supportive response in Gujarati and detect mood.`);
-            target.innerText = result;
+        // --- 3. DIGITAL CLOCK ---
+        function updateClock() {
+            const clockEl = document.getElementById('digital-clock');
+            const now = new Date();
+            clockEl.innerText = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
         }
+        setInterval(updateClock, 1000);
 
-        async function analyzeMonth() {
-            const box = document.getElementById('cal-ai-box');
-            const target = document.getElementById('cal-ai-text');
-            box.style.display = "block";
-            target.innerText = "તમારા આખા મહિનાના ડેટાનું વિશ્લેષણ થઈ રહ્યું છે...";
-
-            const user = auth.currentUser;
-            const snapshot = await db.collection("diaryEntries").where("uid", "==", user.uid).limit(10).get();
-            let combinedText = snapshot.docs.map(d => d.data().highlight).join(", ");
-
-            if (!combinedText) {
-                target.innerText = "વિશ્લેષણ કરવા માટે પૂરતો ડેટા નથી.";
-                return;
-            }
-
-            const result = await callGeminiAI(`Here are the highlights of my month: ${combinedText}. Summarize my month and give me one piece of advice in Gujarati.`);
-            target.innerText = result;
-        }
-
-        // --- 5. CALENDAR & DATABASE LOGIC ---
+        // --- 4. APP CORE LOGIC ---
         function initCalendar() {
             calendar = new FullCalendar.Calendar(document.getElementById('calendar'), {
                 initialView: 'dayGridMonth', height: 'auto',
@@ -199,7 +188,7 @@ projectId: "nirajk-diary",
                 events: async function(info, success) {
                     const user = auth.currentUser;
                     const snapshot = await db.collection("diaryEntries").where("uid", "==", user.uid).get();
-                    success(snapshot.docs.map(doc => ({ title: doc.data().highlight || "📄", start: doc.data().date, color: '#bc8cf2', textColor: 'black' })));
+                    success(snapshot.docs.map(doc => ({ title: doc.data().highlight || "📄", start: doc.data().date, color: '#ffeb3b', textColor: 'black' })));
                 }
             });
             calendar.render();
@@ -212,6 +201,7 @@ projectId: "nirajk-diary",
             if (user) {
                 document.getElementById('login-page').style.display = 'none';
                 document.getElementById('app-interface').style.display = 'block';
+                updateSeasonalBackground();
                 initCalendar();
             }
         });
@@ -221,7 +211,6 @@ projectId: "nirajk-diary",
             document.getElementById('calendar-page').style.display = 'none';
             document.getElementById('note-page').style.display = 'block';
             document.getElementById('display-date').innerText = date;
-            document.getElementById('note-ai-box').style.display = 'none';
             loadEntry(date);
         }
 
@@ -245,21 +234,22 @@ projectId: "nirajk-diary",
 
         async function saveEntry() {
             const user = auth.currentUser;
-            document.getElementById('status-msg').innerText = "Saving...";
+            document.getElementById('status-msg').innerText = "સાચવી રહ્યા છીએ...";
             await db.collection("diaryEntries").doc(`${user.uid}_${selectedDate}`).set({
                 uid: user.uid, date: selectedDate,
                 text: quill.root.innerHTML,
                 highlight: document.getElementById('highlight').value
             });
-            document.getElementById('status-msg').innerText = "✓ Saved!";
-            setTimeout(() => { document.getElementById('status-msg').innerText = ""; }, 2000);
+            document.getElementById('status-msg').innerText = "સફળતાપૂર્વક સચવાઈ ગયું! ✓";
+            setTimeout(() => { document.getElementById('status-msg').innerText = ""; }, 3000);
         }
 
         function startSpeech() {
             const rec = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
             rec.lang = 'gu-IN';
-            rec.onstart = () => { document.getElementById('status-msg').innerText = "Listening..."; };
+            rec.onstart = () => { document.getElementById('status-msg').innerText = "હું સાંભળું છું... બોલો..."; };
             rec.onresult = (e) => { quill.insertText(quill.getLength(), " " + e.results[0][0].transcript); };
+            rec.onend = () => { document.getElementById('status-msg').innerText = ""; };
             rec.start();
         }
     </script>
