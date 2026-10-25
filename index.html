@@ -142,8 +142,8 @@ projectId: "nirajk-diary",
 
         // BACK TO ORIGINAL POPUP LOGIN
         function login() { 
-            auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).catch(err => alert("Login Error: " + err.message)); 
-        }
+    auth.signInWithRedirect(new firebase.auth.GoogleAuthProvider()); 
+}
 
         function logout() { auth.signOut().then(() => { location.reload(); }); }
 
