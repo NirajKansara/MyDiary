@@ -5,8 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>My Private Diary</title>
     
+    <!-- Fonts: Rasa for Gujarati, Standard Sans for English -->
     <link href="https://fonts.googleapis.com/css2?family=Rasa:wght@400;700&family=Noto+Sans+Gujarati:wght@400;700&display=swap" rel="stylesheet">
     
+    <!-- Libraries -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
@@ -16,18 +18,50 @@
 
     <style>
         :root { --glass: rgba(0, 0, 0, 0.85); --accent: #FFD700; --text: #ffffff; }
-        body, html { margin: 0; padding: 0; height: 100%; font-family: Arial, 'Rasa', sans-serif; background: #000; color: var(--text); background-size: cover; background-position: center; background-attachment: fixed; transition: background-image 1.2s; }
-        #digital-clock { position: fixed; top: 10px; right: 20px; font-size: 1.1rem; color: var(--accent); font-weight: bold; font-family: monospace; background: rgba(0,0,0,0.6); padding: 5px 12px; border-radius: 20px; z-index: 1001; }
-        #login-page { height: 100vh; width: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; background: #111; position: fixed; top: 0; left: 0; z-index: 2000; }
+        
+        body, html { 
+            margin: 0; padding: 0; height: 100%; 
+            font-family: Arial, 'Rasa', sans-serif; 
+            background: #000; color: var(--text);
+            background-size: cover; background-position: center; background-attachment: fixed;
+            transition: background-image 1.2s;
+        }
+
+        /* LOGIN PAGE: ONLY DIARY PIC, TITLE AND BUTTON */
+        #login-page { 
+            height: 100vh; width: 100%; display: flex; flex-direction: column; 
+            justify-content: center; align-items: center; text-align: center;
+            background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), 
+                        url('https://images.unsplash.com/photo-1517842645767-c639042777db?auto=format&fit=crop&w=1200&q=80');
+            background-size: cover; background-position: center; 
+            position: fixed; top: 0; left: 0; z-index: 2000;
+        }
+
+        #digital-clock { 
+            position: fixed; top: 10px; right: 20px; font-size: 1.1rem; color: var(--accent); 
+            font-weight: bold; font-family: monospace; background: rgba(0,0,0,0.6); 
+            padding: 5px 12px; border-radius: 20px; z-index: 1001; 
+        }
+
         #app-interface { display: none; }
         .app-container { max-width: 800px; margin: auto; padding: 20px; background: var(--glass); min-height: 100vh; }
         .header h2 { font-family: 'Rasa', serif; font-size: 2.2rem; color: var(--accent); margin: 0; }
+
+        /* Calendar */
         #calendar { background: rgba(255,255,255,0.05); border-radius: 12px; padding: 10px; border: 1px solid #444; margin-top: 10px; }
         .fc-daygrid-day-number { color: white !important; text-decoration: none !important; }
+
+        /* Writing Page */
         #note-page { display: none; }
-        input.highlight-box { width: 100%; padding: 12px; background: #222; border: 1px solid #444; color: white; border-radius: 8px; margin-bottom: 15px; font-size: 1.3rem; font-family: 'Rasa'; box-sizing: border-box; }
+        input.highlight-box { 
+            width: 100%; padding: 12px; background: #222; border: 1px solid #444; 
+            color: white; border-radius: 8px; margin-bottom: 15px; font-size: 1.3rem; 
+            font-family: 'Rasa'; box-sizing: border-box; 
+        }
         .ql-container { font-size: 1.2rem; height: 350px; background: #111; color: white; border-radius: 0 0 8px 8px; border: 1px solid #444 !important; }
         .ql-toolbar { background: #f0f0f0 !important; border-radius: 8px 8px 0 0; }
+
+        /* Buttons */
         button { padding: 12px 20px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; }
         .btn-voice { background: #4caf50; color: white; width: 100%; margin-top: 10px; }
         .btn-back { background: #444; color: white; }
@@ -37,12 +71,14 @@
 </head>
 <body>
 
+    <!-- SCREEN 1: LOGIN -->
     <div id="login-page">
-        <h1 id="login-title" style="color:var(--accent); font-size: 3.5rem; margin: 0; font-family: 'Rasa';">મારી ડાયરી</h1>
-        <p id="login-sub" style="color: #ddd; margin-bottom: 30px;">તમારા વિચારો, સુરક્ષિત અને ઓટો-સેવ.</p>
-        <button id="login-btn" style="background: white; color: black; padding: 15px 40px; font-size: 1.2rem;" onclick="login()">Login with Google</button>
+        <h1 style="color:var(--accent); font-size: 4rem; margin: 0; font-family: 'Rasa';">મારી ડાયરી</h1>
+        <br>
+        <button id="login-btn" style="background: white; color: black; padding: 15px 45px; font-size: 1.3rem; border-radius: 50px;" onclick="login()">Login with Google</button>
     </div>
 
+    <!-- SCREEN 2: MAIN APP -->
     <div id="app-interface">
         <div id="digital-clock">00:00:00</div>
         <div class="app-container">
@@ -68,7 +104,8 @@
     </div>
 
     <script>
-        const firebaseConfig = {
+        // --- FIREBASE CONFIG ---
+        cconst firebaseConfig = {
  apiKey: "AIzaSyCxWGAjeG5OTK1XkpwqtCCmLIz2UN8vAps",
  authDomain: "nirajk-diary.firebaseapp.com",
 projectId: "nirajk-diary",
@@ -105,20 +142,9 @@ projectId: "nirajk-diary",
             calendar.render();
         }
 
-        // IMPROVED LOGIN
-        async function login() {
-            const btn = document.getElementById('login-btn');
-            btn.innerText = "Connecting...";
-            try {
-                const provider = new firebase.auth.GoogleAuthProvider();
-                await auth.signInWithPopup(provider);
-            } catch (error) {
-                console.error(error);
-                alert("Login Failed: " + error.message);
-                btn.innerText = "Login with Google";
-            }
+        function login() { 
+            auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).catch(err => alert("Error: " + err.message)); 
         }
-
         function logout() { auth.signOut().then(() => { location.reload(); }); }
 
         auth.onAuthStateChanged(user => {
