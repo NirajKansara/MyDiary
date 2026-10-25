@@ -5,10 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>My Private Diary</title>
     
-    <!-- Google Fonts: Rasa for Gujarati, Standard Sans-Serif for English -->
     <link href="https://fonts.googleapis.com/css2?family=Rasa:wght@400;700&family=Noto+Sans+Gujarati:wght@400;700&display=swap" rel="stylesheet">
     
-    <!-- Libraries -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
@@ -17,88 +15,37 @@
     <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
 
     <style>
-        :root { 
-            --glass: rgba(0, 0, 0, 0.85); 
-            --accent: #FFD700; 
-            --text: #ffffff;
-        }
-        
-        body, html { 
-            margin: 0; padding: 0; height: 100%; 
-            font-family: 'Helvetica Neue', Helvetica, Arial, 'Rasa', 'Noto Sans Gujarati', sans-serif; 
-            background: #000; color: var(--text);
-            background-size: cover; background-position: center; background-attachment: fixed;
-            transition: background-image 1.2s ease-in-out;
-        }
-
-        /* DIGITAL CLOCK */
-        #digital-clock {
-            position: fixed; top: 10px; right: 20px;
-            font-size: 1.1rem; color: var(--accent);
-            font-weight: bold; font-family: monospace;
-            background: rgba(0,0,0,0.6); padding: 5px 12px; border-radius: 20px;
-            z-index: 1001; border: 1px solid rgba(255,255,0,0.3);
-        }
-
-        /* LOGIN SCREEN */
-        #login-page { 
-            height: 100vh; width: 100%; display: flex; flex-direction: column; 
-            justify-content: center; align-items: center; text-align: center;
-            background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('https://images.unsplash.com/photo-1517842645767-c639042777db?auto=format&fit=crop&w=1200&q=80');
-            background-size: cover; position: fixed; top: 0; left: 0; z-index: 2000;
-        }
-
-        /* MAIN APP UI */
+        :root { --glass: rgba(0, 0, 0, 0.85); --accent: #FFD700; --text: #ffffff; }
+        body, html { margin: 0; padding: 0; height: 100%; font-family: Arial, 'Rasa', sans-serif; background: #000; color: var(--text); background-size: cover; background-position: center; background-attachment: fixed; transition: background-image 1.2s; }
+        #digital-clock { position: fixed; top: 10px; right: 20px; font-size: 1.1rem; color: var(--accent); font-weight: bold; font-family: monospace; background: rgba(0,0,0,0.6); padding: 5px 12px; border-radius: 20px; z-index: 1001; }
+        #login-page { height: 100vh; width: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; background: #111; position: fixed; top: 0; left: 0; z-index: 2000; }
         #app-interface { display: none; }
-        .app-container { max-width: 800px; margin: auto; padding: 20px; background: var(--glass); min-height: 100vh; box-shadow: 0 0 40px rgba(0,0,0,0.5); }
-
+        .app-container { max-width: 800px; margin: auto; padding: 20px; background: var(--glass); min-height: 100vh; }
         .header h2 { font-family: 'Rasa', serif; font-size: 2.2rem; color: var(--accent); margin: 0; }
-
-        /* Calendar */
         #calendar { background: rgba(255,255,255,0.05); border-radius: 12px; padding: 10px; border: 1px solid #444; margin-top: 10px; }
         .fc-daygrid-day-number { color: white !important; text-decoration: none !important; }
-        .fc-col-header-cell-cushion { color: var(--accent) !important; text-decoration: none !important; }
-
-        /* Writing Page */
         #note-page { display: none; }
-        input.highlight-box { 
-            width: 100%; padding: 12px; background: #222; border: 1px solid #444; 
-            color: white; border-radius: 8px; margin-bottom: 15px; box-sizing: border-box; 
-            font-size: 1.3rem; font-family: 'Rasa', serif;
-        }
-        
+        input.highlight-box { width: 100%; padding: 12px; background: #222; border: 1px solid #444; color: white; border-radius: 8px; margin-bottom: 15px; font-size: 1.3rem; font-family: 'Rasa'; box-sizing: border-box; }
         .ql-container { font-size: 1.2rem; height: 350px; background: #111; color: white; border-radius: 0 0 8px 8px; border: 1px solid #444 !important; }
-        .ql-toolbar { background: #f0f0f0 !important; border-radius: 8px 8px 0 0; border: 1px solid #444 !important; }
-
-        /* Buttons */
-        button { padding: 12px 20px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .ql-toolbar { background: #f0f0f0 !important; border-radius: 8px 8px 0 0; }
+        button { padding: 12px 20px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; }
         .btn-voice { background: #4caf50; color: white; width: 100%; margin-top: 10px; }
         .btn-back { background: #444; color: white; }
         .btn-logout { background: transparent; border: 1px solid #ff4444; color: #ff4444; padding: 5px 15px; }
-        
         #status-msg { text-align: center; color: var(--accent); margin-top: 15px; font-weight: bold; height: 20px; }
-
-        @media (max-width: 600px) {
-            .app-container { padding: 10px; }
-            .header h2 { font-size: 1.7rem; }
-        }
     </style>
 </head>
 <body>
 
-    <!-- SCREEN 1: LOGIN -->
     <div id="login-page">
-        <h1 style="color:var(--accent); font-size: 3.5rem; margin: 0; font-family: 'Rasa';">મારી ડાયરી</h1>
-        <p style="color: #ddd; margin-bottom: 30px;">તમારા વિચારો, સુરક્ષિત અને ઓટો-સેવ.</p>
-        <button style="background: white; color: black; padding: 15px 40px; font-size: 1.2rem;" onclick="login()">Login with Google</button>
+        <h1 id="login-title" style="color:var(--accent); font-size: 3.5rem; margin: 0; font-family: 'Rasa';">મારી ડાયરી</h1>
+        <p id="login-sub" style="color: #ddd; margin-bottom: 30px;">તમારા વિચારો, સુરક્ષિત અને ઓટો-સેવ.</p>
+        <button id="login-btn" style="background: white; color: black; padding: 15px 40px; font-size: 1.2rem;" onclick="login()">Login with Google</button>
     </div>
 
-    <!-- SCREEN 2: MAIN APP -->
     <div id="app-interface">
         <div id="digital-clock">00:00:00</div>
-        
         <div class="app-container">
-            <!-- PAGE: CALENDAR -->
             <div id="calendar-page">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; padding-top: 30px;">
                     <h2>નમસ્તે</h2>
@@ -107,27 +54,20 @@
                 <div id="calendar"></div>
             </div>
 
-            <!-- PAGE: WRITING -->
             <div id="note-page">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; padding-top: 30px;">
                     <button class="btn-back" onclick="showCalendar()">← Back</button>
                     <div id="display-date" style="color:var(--accent); font-weight:bold; font-size: 1.2rem;">Date</div>
                 </div>
-
-                <input type="text" id="highlight" class="highlight-box" placeholder="આજની ટૂંકી વિગત (Highlight)..." oninput="autoSave()">
-                
+                <input type="text" id="highlight" class="highlight-box" placeholder="આજની વિગત..." oninput="autoSave()">
                 <div id="editor"></div>
-                
-                <button class="btn-voice" onclick="startSpeech()">🎤 બોલીને લખો (Gujarati Voice)</button>
-                
-                <!-- AUTO SAVE STATUS -->
+                <button class="btn-voice" onclick="startSpeech()">🎤 બોલીને લખો</button>
                 <p id="status-msg"></p>
             </div>
         </div>
     </div>
 
     <script>
-        // --- 1. FIREBASE CONFIG (Replace PASTE_HERE with your details) ---
         const firebaseConfig = {
  apiKey: "AIzaSyCxWGAjeG5OTK1XkpwqtCCmLIz2UN8vAps",
  authDomain: "nirajk-diary.firebaseapp.com",
@@ -136,6 +76,7 @@ projectId: "nirajk-diary",
  messagingSenderId: "716509879684",
  appId: "1:716509879684:web:f49ffa26687e1b3ce291d1"
 };
+
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.firestore();
@@ -145,42 +86,40 @@ projectId: "nirajk-diary",
         let calendar;
         let saveTimeout = null;
 
-        // Digital Clock
-        setInterval(() => {
-            document.getElementById('digital-clock').innerText = new Date().toLocaleTimeString();
-        }, 1000);
+        setInterval(() => { document.getElementById('digital-clock').innerText = new Date().toLocaleTimeString(); }, 1000);
 
-        // Seasonal Backgrounds
         function setSeasonBg() {
-            const m = new Date().getMonth();
-            const bgs = [
-                'https://images.unsplash.com/photo-1543332164-6e82f355badc?w=1200', 'https://images.unsplash.com/photo-1522748906645-95d8adfd52c7?w=1200',
-                'https://images.unsplash.com/photo-1590422502621-08ec39634346?w=1200', 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=1200',
-                'https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=1200', 'https://images.unsplash.com/photo-1513519245088-0e12902e35ca?w=1200',
-                'https://images.unsplash.com/photo-1508849789987-4e5333c12b78?w=1200', 'https://images.unsplash.com/photo-1470252649358-9c9e6c739946?w=1200',
-                'https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=1200', 'https://images.unsplash.com/photo-1504198453319-5ce911bafcde?w=1200',
-                'https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?w=1200', 'https://images.unsplash.com/photo-1482517967863-00e15c9b44be?w=1200'
-            ];
-            document.body.style.backgroundImage = `url('${bgs[m]}')`;
+            const bgs = ['https://images.unsplash.com/photo-1543332164-6e82f355badc?w=1200','https://images.unsplash.com/photo-1522748906645-95d8adfd52c7?w=1200','https://images.unsplash.com/photo-1590422502621-08ec39634346?w=1200','https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=1200','https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=1200','https://images.unsplash.com/photo-1513519245088-0e12902e35ca?w=1200','https://images.unsplash.com/photo-1508849789987-4e5333c12b78?w=1200','https://images.unsplash.com/photo-1470252649358-9c9e6c739946?w=1200','https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=1200','https://images.unsplash.com/photo-1504198453319-5ce911bafcde?w=1200','https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?w=1200','https://images.unsplash.com/photo-1482517967863-00e15c9b44be?w=1200'];
+            document.body.style.backgroundImage = `url('${bgs[new Date().getMonth()]}')`;
         }
 
-        // App Core Logic
         function initCalendar() {
             calendar = new FullCalendar.Calendar(document.getElementById('calendar'), {
                 initialView: 'dayGridMonth', height: 'auto',
                 dateClick: (i) => openDiary(i.dateStr),
                 events: async function(i, success) {
-                    const u = auth.currentUser;
-                    const snap = await db.collection("diaryEntries").where("uid", "==", u.uid).get();
+                    const snap = await db.collection("diaryEntries").where("uid", "==", auth.currentUser.uid).get();
                     success(snap.docs.map(d => ({ title: d.data().highlight || "📄", start: d.data().date, color: '#FFD700', textColor: 'black' })));
                 }
             });
             calendar.render();
         }
 
-        // Use Redirect instead of Popup for better mobile login
-        function login() { auth.signInWithRedirect(new firebase.auth.GoogleAuthProvider()); }
-        function logout() { auth.signOut(); location.reload(); }
+        // IMPROVED LOGIN
+        async function login() {
+            const btn = document.getElementById('login-btn');
+            btn.innerText = "Connecting...";
+            try {
+                const provider = new firebase.auth.GoogleAuthProvider();
+                await auth.signInWithPopup(provider);
+            } catch (error) {
+                console.error(error);
+                alert("Login Failed: " + error.message);
+                btn.innerText = "Login with Google";
+            }
+        }
+
+        function logout() { auth.signOut().then(() => { location.reload(); }); }
 
         auth.onAuthStateChanged(user => {
             if (user) {
@@ -188,6 +127,8 @@ projectId: "nirajk-diary",
                 document.getElementById('app-interface').style.display = 'block';
                 setSeasonBg();
                 initCalendar();
+            } else {
+                document.getElementById('login-page').style.display = 'flex';
             }
         });
 
@@ -206,8 +147,7 @@ projectId: "nirajk-diary",
         }
 
         async function loadEntry(date) {
-            const u = auth.currentUser;
-            const doc = await db.collection("diaryEntries").doc(`${u.uid}_${date}`).get();
+            const doc = await db.collection("diaryEntries").doc(`${auth.currentUser.uid}_${date}`).get();
             if (doc.exists) {
                 quill.root.innerHTML = doc.data().text;
                 document.getElementById('highlight').value = doc.data().highlight || "";
@@ -217,36 +157,27 @@ projectId: "nirajk-diary",
             }
         }
 
-        // --- AUTO SAVE LOGIC (Google Doc Style) ---
         function autoSave() {
             const status = document.getElementById('status-msg');
-            status.innerText = "Saving changes...";
-            status.style.color = "#FFD700";
-
+            status.innerText = "Saving...";
             clearTimeout(saveTimeout);
             saveTimeout = setTimeout(async () => {
-                const u = auth.currentUser;
-                await db.collection("diaryEntries").doc(`${u.uid}_${selectedDate}`).set({
-                    uid: u.uid, date: selectedDate,
+                await db.collection("diaryEntries").doc(`${auth.currentUser.uid}_${selectedDate}`).set({
+                    uid: auth.currentUser.uid, date: selectedDate,
                     text: quill.root.innerHTML,
                     highlight: document.getElementById('highlight').value
                 });
-                status.innerText = "All changes saved to Cloud ✓";
-                status.style.color = "#4caf50";
-            }, 1500); // Saves 1.5 seconds after you stop typing
+                status.innerText = "Saved ✓";
+                setTimeout(() => { status.innerText = ""; }, 2000);
+            }, 1500);
         }
-
-        // Listen for typing in the main editor
         quill.on('text-change', autoSave);
 
         function startSpeech() {
             const rec = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
             rec.lang = 'gu-IN';
-            rec.onstart = () => { document.getElementById('status-msg').innerText = "Listening... બોલો..."; };
-            rec.onresult = (e) => { 
-                quill.insertText(quill.getLength(), " " + e.results[0][0].transcript);
-                autoSave(); // Trigger auto-save after voice typing
-            };
+            rec.onstart = () => { document.getElementById('status-msg').innerText = "Listening..."; };
+            rec.onresult = (e) => { quill.insertText(quill.getLength(), " " + e.results[0][0].transcript); autoSave(); };
             rec.start();
         }
     </script>
