@@ -119,14 +119,14 @@
                     <div id="display-date" style="color:var(--accent); font-size: 1.5rem;">Date</div>
                 </div>
 
-                <input type="text" id="highlight" class="highlight-box" placeholder="આજના દિવસનો મુખ્ય વિચાર...">
+                <input type="text" id="highlight" class="highlight-box" placeholder="લખવાનું શરૂ કરો...">
                 
                 <div id="editor-container">
                     <div id="editor"></div>
                 </div>
                 
                 <button class="btn-voice" onclick="startSpeech()">🎤 બોલીને લખો (Gujarati Voice)</button>
-                <button class="btn-save" onclick="saveEntry()">ડાયરી સાચવો (Save Entry)</button>
+                <button class="btn-save" onclick="saveEntry()">લખેલું સેવ કરો (Save Entry)</button>
                 <p id="status-msg" style="text-align: center; color: var(--accent); margin-top: 10px; font-size: 1.2rem;"></p>
             </div>
 
@@ -240,7 +240,7 @@ projectId: "nirajk-diary",
                 text: quill.root.innerHTML,
                 highlight: document.getElementById('highlight').value
             });
-            document.getElementById('status-msg').innerText = "સફળતાપૂર્વક સચવાઈ ગયું! ✓";
+            document.getElementById('status-msg').innerText = "સફળતાપૂર્વક સેવ થયું! ✓";
             setTimeout(() => { document.getElementById('status-msg').innerText = ""; }, 3000);
         }
 
